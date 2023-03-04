@@ -1,5 +1,7 @@
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
+import Notiflix from 'notiflix';
+
 
 const formEL = document.querySelector('.search-form');
 const btnEl = document.querySelector('.load-more');
@@ -18,8 +20,12 @@ function onSearch(e) {
   e.preventDefault();
 
   searchQuery = e.currentTarget.elements.searchQuery.value;
+  if (searchQuery === '') {
+   return Notiflix.Notify.failure('Enter the correct name');
+ }
   // fetchHits().then(onHitsMarkup);
   fetchHits().then(hits => {
+  
     clearHitsContainer();
     onHitsMarkup(hits);
   });
@@ -27,14 +33,24 @@ function onSearch(e) {
 
 function fetchHits() {
   return fetch(
-    `https://pixabay.com/api/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=5&page=1`
+    `https://pixabay.com/api/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=20&page=1`
   )
     .then(r => r.json())
     .then(data => {
+      console.log(data);
+      if (data.total === 0) {
+       
+        Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again');
+        
+      }
       page = 1;
-      onHiddenLoadMore()
+
+      if (data.total > 1) {
+        onHiddenLoadMore()
+      }
       
-      return data.hits;
+  
+    return data.hits;
     });
 }
 
@@ -50,7 +66,7 @@ function feachLoadMoreMurkup() {
 function onLoadMore() {
   page += 1;
   return fetch(
-    `https://pixabay.com/api/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=5&page=${page}`
+    `https://pixabay.com/api/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=20&page=${page}`
   )
     .then(r => r.json())
     .then(data => {
@@ -59,7 +75,8 @@ function onLoadMore() {
 }
 
 function onHitsMarkup(hits) {
-  const result = hits
+  
+    const result = hits
     .map(
       ({
         webformatURL,
@@ -78,20 +95,20 @@ function onHitsMarkup(hits) {
   </a>
   <div class="info">
     <p class="info-item">
-        likes
-      <b>${likes}</b>
+    <b>Likes</b>
+    ${likes}
     </p>
     <p class="info-item">
-        views
-      <b>${views}</b>
+    <b>Views</b>
+                ${views}
     </p>
     <p class="info-item">
-        comments
-      <b>${comments}</b>
+    <b>Comments</b>
+    ${comments}
     </p>
     <p class="info-item">
-       downloads
-      <b>${downloads}</b>
+    <b>Downloads</b>
+                ${downloads}
     </p>
   </div>
 </div>
@@ -104,6 +121,8 @@ function onHitsMarkup(hits) {
 
     createMarkup(result)
     var lightbox = new SimpleLightbox('.gallery a', { /* options */ });
+  
+  
 }
 
 function createMarkup(result) {
