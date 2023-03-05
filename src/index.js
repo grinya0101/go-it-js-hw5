@@ -1,8 +1,7 @@
-
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import Notiflix from 'notiflix';
 import onHitsMarkup from './onHitsMarkup'
-import onLoadMore from './onLoadMore'
+
 
 
 const formEL = document.querySelector('.search-form');
@@ -15,8 +14,9 @@ export const API_KEY = '29209271-716f3ea82b952e36eef48fa19';
 formEL.addEventListener('submit', onSearch);
 btnEl.addEventListener('click', feachLoadMoreMurkup);
 
-export let searchQuery = ''; 
-export let page = 1;
+ let searchQuery = ''; 
+ let page = 1;
+
 
 function onSearch(e) {
   e.preventDefault();
@@ -50,6 +50,17 @@ async function fetchHits() {
   return newHits.hits;
 }
 
+ async function onLoadMore() {
+   page += 1;
+ 
+  const respons = await fetch(
+    `https://pixabay.com/api/?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&per_page=20&page=${page}`
+  );
+    
+  const newHits = await respons.json();
+    console.log(newHits);
+  return newHits.hits;
+}
 
 
 function clearHitsAndUpdate() {
@@ -84,3 +95,5 @@ export default function createMarkup(result) {
 function clearHitsContainer() {
   divEl.innerHTML = '';
 }
+
+
